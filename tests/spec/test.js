@@ -129,7 +129,7 @@ describe('filter', function () {
     });
 
     ifHasDenseUndefinedsIt('should skip unset values', function () {
-      var passedValues = {};
+      var passedValues = [];
       testSubject = [
         1,
         2,
@@ -147,7 +147,7 @@ describe('filter', function () {
     });
 
     it('should pass the right context to the filter', function () {
-      var passedValues = {};
+      var passedValues = [];
       testSubject = [
         1,
         2,
