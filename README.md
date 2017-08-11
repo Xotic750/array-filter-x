@@ -23,7 +23,7 @@
 ## array-filter-x
 Creates an array with all elements that pass the test by the provided function.
 
-**Version**: 1.0.1  
+**Version**: 1.1.0  
 **Author**: Xotic750 <Xotic750@gmail.com>  
 **License**: [MIT](&lt;https://opensource.org/licenses/MIT&gt;)  
 **Copyright**: Xotic750  

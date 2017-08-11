@@ -1,6 +1,6 @@
 /**
  * @file Creates an array with all elements that pass the test by the provided function.
- * @version 1.0.1
+ * @version 1.1.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
