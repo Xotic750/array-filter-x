@@ -1,6 +1,6 @@
 /**
  * @file Creates an array with all elements that pass the test by the provided function.
- * @version 2.0.0
+ * @version 2.1.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -28,9 +28,9 @@ if (nativFilter) {
       spy += item;
       return index === 1;
     });
-  }
 
-  isWorking = res.threw === false && res.value && res.value.length === 1 && res.value[0] === 'b' && spy === 'abc';
+    isWorking = res.threw === false && res.value && res.value.length === 1 && res.value[0] === 'b' && spy === 'abc';
+  }
 
   if (isWorking) {
     spy = 0;
