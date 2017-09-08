@@ -1,6 +1,6 @@
 {
   "name": "array-filter-x",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Creates an array with all elements that pass the test by the provided function.",
   "homepage": "https://github.com/Xotic750/array-filter-x",
   "author": {

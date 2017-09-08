@@ -1,6 +1,6 @@
 /**
  * @file Creates an array with all elements that pass the test by the provided function.
- * @version 2.1.0
+ * @version 2.2.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -9,11 +9,11 @@
 
 'use strict';
 
-var attempt = require('attempt-x');
 var nativFilter = typeof Array.prototype.filter === 'function' && Array.prototype.filter;
 
 var isWorking;
 if (nativFilter) {
+  var attempt = require('attempt-x');
   var spy = 0;
   var res = attempt.call([1, 2], nativFilter, function (item) {
     spy += item;
