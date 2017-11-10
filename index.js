@@ -1,6 +1,6 @@
 /**
  * @file Creates an array with all elements that pass the test by the provided function.
- * @version 2.2.0
+ * @version 2.3.0
  * @author Xotic750 <Xotic750@gmail.com>
  * @copyright  Xotic750
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
@@ -9,7 +9,10 @@
 
 'use strict';
 
-var nativFilter = typeof Array.prototype.filter === 'function' && Array.prototype.filter;
+var cachedCtrs = require('cached-constructors-x');
+var ArrayCtr = cachedCtrs.Array;
+var castObject = cachedCtrs.Object;
+var nativFilter = typeof ArrayCtr.prototype.filter === 'function' && ArrayCtr.prototype.filter;
 
 var isWorking;
 if (nativFilter) {
@@ -24,7 +27,7 @@ if (nativFilter) {
 
   if (isWorking) {
     spy = '';
-    res = attempt.call(Object('abc'), nativFilter, function (item, index) {
+    res = attempt.call(castObject('abc'), nativFilter, function (item, index) {
       spy += item;
       return index === 1;
     });
@@ -120,7 +123,7 @@ if (nativFilter) {
   };
 } else {
   var splitIfBoxedBug = require('split-if-boxed-bug-x');
-  var toLength = require('to-length-x');
+  var toLength = require('to-length-x').toLength2018;
   var isUndefined = require('validate.io-undefined');
   var toObject = require('to-object-x');
   var assertIsFunction = require('assert-is-function-x');
