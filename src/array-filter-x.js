@@ -1,25 +1,26 @@
 /**
  * @file Creates an array with all elements that pass the test by the provided function.
- * @version 2.3.0
- * @author Xotic750 <Xotic750@gmail.com>
- * @copyright  Xotic750
+ * @version 2.3.0.
+ * @author Xotic750 <Xotic750@gmail.com>.
+ * @copyright  Xotic750.
  * @license {@link <https://opensource.org/licenses/MIT> MIT}
- * @module array-filter-x
+ * @module Array-filter-x.
  */
 
-'use strict';
+const cachedCtrs = require('cached-constructors-x');
 
-var cachedCtrs = require('cached-constructors-x');
-var ArrayCtr = cachedCtrs.Array;
-var castObject = cachedCtrs.Object;
-var nativFilter = typeof ArrayCtr.prototype.filter === 'function' && ArrayCtr.prototype.filter;
+const ArrayCtr = cachedCtrs.Array;
+const castObject = cachedCtrs.Object;
+const nativFilter = typeof ArrayCtr.prototype.filter === 'function' && ArrayCtr.prototype.filter;
 
-var isWorking;
+let isWorking;
+
 if (nativFilter) {
-  var attempt = require('attempt-x');
-  var spy = 0;
-  var res = attempt.call([1, 2], nativFilter, function (item) {
+  const attempt = require('attempt-x');
+  let spy = 0;
+  let res = attempt.call([1, 2], nativFilter, function(item) {
     spy += item;
+
     return false;
   });
 
@@ -27,8 +28,9 @@ if (nativFilter) {
 
   if (isWorking) {
     spy = '';
-    res = attempt.call(castObject('abc'), nativFilter, function (item, index) {
+    res = attempt.call(castObject('abc'), nativFilter, function(item, index) {
       spy += item;
+
       return index === 1;
     });
 
@@ -37,41 +39,53 @@ if (nativFilter) {
 
   if (isWorking) {
     spy = 0;
-    res = attempt.call((function () {
-      return arguments;
-    }(1, 2, 3)), nativFilter, function (item, index) {
-      spy += item;
-      return index === 2;
-    });
+    res = attempt.call(
+      (function() {
+        return arguments;
+      })(1, 2, 3),
+      nativFilter,
+      function(item, index) {
+        spy += item;
+
+        return index === 2;
+      },
+    );
 
     isWorking = res.threw === false && res.value && res.value.length === 1 && res.value[0] === 3 && spy === 6;
   }
 
   if (isWorking) {
     spy = 0;
-    res = attempt.call({
-      0: 1,
-      1: 2,
-      3: 3,
-      4: 4,
-      length: 4
-    }, nativFilter, function (item) {
-      spy += item;
-      return false;
-    });
+    res = attempt.call(
+      {
+        0: 1,
+        1: 2,
+        3: 3,
+        4: 4,
+        length: 4,
+      },
+      nativFilter,
+      function(item) {
+        spy += item;
+
+        return false;
+      },
+    );
 
     isWorking = res.threw === false && res.value && res.value.length === 0 && spy === 6;
   }
 
   if (isWorking) {
-    var doc = typeof document !== 'undefined' && document;
+    const doc = typeof document !== 'undefined' && document;
+
     if (doc) {
       spy = null;
-      var fragment = doc.createDocumentFragment();
-      var div = doc.createElement('div');
+      const fragment = doc.createDocumentFragment();
+      const div = doc.createElement('div');
       fragment.appendChild(div);
-      res = attempt.call(fragment.childNodes, nativFilter, function (item) {
+      res = attempt.call(fragment.childNodes, nativFilter, function(item) {
         spy = item;
+
         return item;
       });
 
@@ -80,17 +94,22 @@ if (nativFilter) {
   }
 
   if (isWorking) {
-    var isStrict = (function () {
+    const isStrict = (function() {
       // eslint-disable-next-line no-invalid-this
       return Boolean(this) === false;
-    }());
+    })();
 
     if (isStrict) {
       spy = null;
-      res = attempt.call([1], nativFilter, function () {
-        // eslint-disable-next-line no-invalid-this
-        spy = typeof this === 'string';
-      }, 'x');
+      res = attempt.call(
+        [1],
+        nativFilter,
+        function() {
+          // eslint-disable-next-line no-invalid-this
+          spy = typeof this === 'string';
+        },
+        'x',
+      );
 
       isWorking = res.threw === false && res.value && res.value.length === 0 && spy === true;
     }
@@ -98,10 +117,10 @@ if (nativFilter) {
 
   if (isWorking) {
     spy = {};
-    var fn = [
+    const fn = [
       'return nativFilter.call("foo", function (_, __, context) {',
       'if (Boolean(context) === false || typeof context !== "object") {',
-      'spy.value = true;}});'
+      'spy.value = true;}});',
     ].join('');
 
     // eslint-disable-next-line no-new-func
@@ -111,10 +130,12 @@ if (nativFilter) {
   }
 }
 
-var $filter;
+let $filter;
+
 if (nativFilter) {
   $filter = function filter(array, callBack /* , thisArg */) {
-    var args = [callBack];
+    const args = [callBack];
+
     if (arguments.length > 2) {
       args[1] = arguments[2];
     }
@@ -122,28 +143,30 @@ if (nativFilter) {
     return nativFilter.apply(array, args);
   };
 } else {
-  var splitIfBoxedBug = require('split-if-boxed-bug-x');
-  var toLength = require('to-length-x').toLength2018;
-  var isUndefined = require('validate.io-undefined');
-  var toObject = require('to-object-x');
-  var assertIsFunction = require('assert-is-function-x');
+  const splitIfBoxedBug = require('split-if-boxed-bug-x');
+  const toLength = require('to-length-x').toLength2018;
+  const isUndefined = require('validate.io-undefined');
+  const toObject = require('to-object-x');
+  const assertIsFunction = require('assert-is-function-x');
 
   $filter = function filter(array, callBack /* , thisArg */) {
-    var object = toObject(array);
+    const object = toObject(array);
     // If no callback function or if callback is not a callable function
     assertIsFunction(callBack);
-    var iterable = splitIfBoxedBug(object);
-    var length = toLength(iterable.length);
-    var thisArg;
+    const iterable = splitIfBoxedBug(object);
+    const length = toLength(iterable.length);
+    let thisArg;
+
     if (arguments.length > 2) {
       thisArg = arguments[2];
     }
 
-    var noThis = isUndefined(thisArg);
-    var result = [];
-    for (var i = 0; i < length; i += 1) {
+    const noThis = isUndefined(thisArg);
+    const result = [];
+    for (let i = 0; i < length; i += 1) {
       if (i in iterable) {
-        var item = iterable[i];
+        const item = iterable[i];
+
         if (noThis ? callBack(item, i, object) : callBack.call(thisArg, item, i, object)) {
           result[result.length] = item;
         }
@@ -158,14 +181,14 @@ if (nativFilter) {
  * This method creates a new array with all elements that pass the test
  * implemented by the provided function.
  *
- * @param {array} array - The array to iterate over.
+ * @param {Array} array - The array to iterate over.
  * @param {Function} callBack - Function is a predicate, to test each element.
  * @param {*} [thisArg] - Value to use as this when executing callback.
  * @throws {TypeError} If array is null or undefined.
  * @throws {TypeError} If callBack is not a function.
- * @returns {array} A new array with the elements that pass the test.
+ * @returns {Array} A new array with the elements that pass the test.
  * @example
- * var filter = require('array-filter-x');
+ * var filter = require('array-filter-x');.
  *
  * function isBigEnough(value) {
  *   return value >= 10;
