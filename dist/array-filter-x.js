@@ -2,13 +2,13 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2017",
-  "date": "2019-07-17T17:40:01.060Z",
+  "date": "2019-07-17T18:47:02.493Z",
   "describe": "",
   "description": "Creates an array with all elements that pass the test by the provided function.",
   "file": "array-filter-x.js",
   "hash": "4560ce3a061d25d425f7",
   "license": "MIT",
-  "version": "3.0.6"
+  "version": "3.0.7"
 }
 */
 (function webpackUniversalModuleDefinition(root, factory) {
