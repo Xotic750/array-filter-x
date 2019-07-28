@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2017",
-  "date": "2019-07-27T21:40:37.895Z",
+  "date": "2019-07-28T14:05:28.867Z",
   "describe": "",
   "description": "Creates an array with all elements that pass the test by the provided function.",
   "file": "array-filter-x.js",
-  "hash": "6ba64ea64aad57e596b4",
+  "hash": "edf2b43737b65c449dd5",
   "license": "MIT",
   "version": "3.0.19"
 }
@@ -1593,6 +1593,7 @@ var assert_is_function_x_esm_assertIsFunction = function assertIsFunction(callba
 
 
 // CONCATENATED MODULE: ./dist/array-filter-x.esm.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "implementation", function() { return array_filter_x_esm_implementation; });
 
 
 
@@ -1749,7 +1750,6 @@ var array_filter_x_esm_implementation = function implementation() {
  * @throws {TypeError} If callBack is not a function.
  * @returns {Array} A new array with the elements that pass the test.
  */
-
 
 var $filter = isWorking ? array_filter_x_esm_patchedFilter() : array_filter_x_esm_implementation();
 /* harmony default export */ var array_filter_x_esm = __webpack_exports__["default"] = ($filter);

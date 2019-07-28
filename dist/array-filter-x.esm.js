@@ -115,7 +115,7 @@ var patchedFilter = function patchedFilter() {
   };
 };
 
-var implementation = function implementation() {
+export var implementation = function implementation() {
   return function filter(array, callBack
   /* , thisArg */
   ) {
@@ -154,7 +154,6 @@ var implementation = function implementation() {
  * @throws {TypeError} If callBack is not a function.
  * @returns {Array} A new array with the elements that pass the test.
  */
-
 
 var $filter = isWorking ? patchedFilter() : implementation();
 export default $filter;
