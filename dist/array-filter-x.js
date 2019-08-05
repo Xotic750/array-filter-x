@@ -2,11 +2,11 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2017",
-  "date": "2019-08-04T20:25:54.810Z",
+  "date": "2019-08-05T11:55:43.671Z",
   "describe": "",
   "description": "Creates an array with all elements that pass the test by the provided function.",
   "file": "array-filter-x.js",
-  "hash": "e1226e575dd75ecc4307",
+  "hash": "a52fbe2f21f87ef74e33",
   "license": "MIT",
   "version": "3.0.20"
 }
@@ -1629,7 +1629,15 @@ var assert_is_function_x_esm_assertIsFunction = function assertIsFunction(callba
 
 
 // CONCATENATED MODULE: ./dist/array-filter-x.esm.js
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "implementation", function() { return array_filter_x_esm_implementation; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "implementation", function() { return implementation; });
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 
 
@@ -1684,6 +1692,15 @@ var array_filter_x_esm_test4 = function test4() {
   return res.threw === false && res.value && res.value.length === 0 && spy === 6;
 };
 
+var getTest5Result = function getTest5Result(args) {
+  var _args = _slicedToArray(args, 3),
+      res = _args[0],
+      div = _args[1],
+      spy = _args[2];
+
+  return res.threw === false && res.value && res.value.length === 1 && res.value[0] === div && spy === div;
+};
+
 var array_filter_x_esm_test5 = function test5() {
   var doc = typeof document !== 'undefined' && document;
 
@@ -1696,7 +1713,7 @@ var array_filter_x_esm_test5 = function test5() {
       spy = item;
       return item;
     });
-    return res.threw === false && res.value && res.value.length === 1 && res.value[0] === div && spy === div;
+    return getTest5Result([res, div, spy]);
   }
 
   return true;
@@ -1710,10 +1727,13 @@ var array_filter_x_esm_test6 = function test6() {
 
   if (isStrict) {
     var spy = null;
-    var res = attempt_x_esm.call([1], nativeFilter, function testThis() {
+
+    var testThis = function testThis() {
       /* eslint-disable-next-line babel/no-invalid-this */
       spy = typeof this === 'string';
-    }, 'x');
+    };
+
+    var res = attempt_x_esm.call([1], nativeFilter, testThis, 'x');
     return res.threw === false && res.value && res.value.length === 0 && spy === true;
   }
 
@@ -1731,49 +1751,45 @@ var array_filter_x_esm_test7 = function test7() {
 
 var isWorking = true.constructor(nativeFilter) && array_filter_x_esm_test1() && array_filter_x_esm_test2() && array_filter_x_esm_test3() && array_filter_x_esm_test4() && array_filter_x_esm_test5() && array_filter_x_esm_test6() && array_filter_x_esm_test7();
 
-var array_filter_x_esm_patchedFilter = function patchedFilter() {
-  return function filter(array, callBack
-  /* , thisArg */
-  ) {
-    require_object_coercible_x_esm(array);
-    var args = [assert_is_function_x_esm(callBack)];
+var patchedFilter = function filter(array, callBack
+/* , thisArg */
+) {
+  require_object_coercible_x_esm(array);
+  var args = [assert_is_function_x_esm(callBack)];
 
-    if (arguments.length > 2) {
-      /* eslint-disable-next-line prefer-rest-params,prefer-destructuring */
-      args[1] = arguments[2];
-    }
+  if (arguments.length > 2) {
+    /* eslint-disable-next-line prefer-rest-params,prefer-destructuring */
+    args[1] = arguments[2];
+  }
 
-    return nativeFilter.apply(array, args);
-  };
+  return nativeFilter.apply(array, args);
 };
 
-var array_filter_x_esm_implementation = function implementation() {
-  return function filter(array, callBack
-  /* , thisArg */
-  ) {
-    var object = to_object_x_esm(array); // If no callback function or if callback is not a callable function
+var implementation = function filter(array, callBack
+/* , thisArg */
+) {
+  var object = to_object_x_esm(array); // If no callback function or if callback is not a callable function
 
-    assert_is_function_x_esm(callBack);
-    var iterable = split_if_boxed_bug_x_esm(object);
-    var length = to_length_x_esm(iterable.length);
-    /* eslint-disable-next-line prefer-rest-params,no-void */
+  assert_is_function_x_esm(callBack);
+  var iterable = split_if_boxed_bug_x_esm(object);
+  var length = to_length_x_esm(iterable.length);
+  /* eslint-disable-next-line prefer-rest-params,no-void */
 
-    var thisArg = arguments.length > 2 ? arguments[2] : void 0;
-    var noThis = typeof thisArg === 'undefined';
-    var result = [];
+  var thisArg = arguments.length > 2 ? arguments[2] : void 0;
+  var noThis = typeof thisArg === 'undefined';
+  var result = [];
 
-    for (var i = 0; i < length; i += 1) {
-      if (i in iterable) {
-        var item = iterable[i];
+  for (var i = 0; i < length; i += 1) {
+    if (i in iterable) {
+      var item = iterable[i];
 
-        if (noThis ? callBack(item, i, object) : callBack.call(thisArg, item, i, object)) {
-          result[result.length] = item;
-        }
+      if (noThis ? callBack(item, i, object) : callBack.call(thisArg, item, i, object)) {
+        result[result.length] = item;
       }
     }
+  }
 
-    return result;
-  };
+  return result;
 };
 /**
  * This method creates a new array with all elements that pass the test
@@ -1787,7 +1803,7 @@ var array_filter_x_esm_implementation = function implementation() {
  * @returns {Array} A new array with the elements that pass the test.
  */
 
-var $filter = isWorking ? array_filter_x_esm_patchedFilter() : array_filter_x_esm_implementation();
+var $filter = isWorking ? patchedFilter : implementation;
 /* harmony default export */ var array_filter_x_esm = __webpack_exports__["default"] = ($filter);
 
 

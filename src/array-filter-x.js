@@ -50,23 +50,19 @@ const test3 = function test3() {
 
 const test4 = function test4() {
   let spy = 0;
-  const res = attempt.call(
-    {
-      0: 1,
-      1: 2,
-      3: 3,
-      4: 4,
-      length: 4,
-    },
-    nativeFilter,
-    function spyAdd4(item) {
-      spy += item;
+  const res = attempt.call({0: 1, 1: 2, 3: 3, 4: 4, length: 4}, nativeFilter, function spyAdd4(item) {
+    spy += item;
 
-      return false;
-    },
-  );
+    return false;
+  });
 
   return res.threw === false && res.value && res.value.length === 0 && spy === 6;
+};
+
+const getTest5Result = function getTest5Result(args) {
+  const [res, div, spy] = args;
+
+  return res.threw === false && res.value && res.value.length === 1 && res.value[0] === div && spy === div;
 };
 
 const test5 = function test5() {
@@ -83,7 +79,7 @@ const test5 = function test5() {
       return item;
     });
 
-    return res.threw === false && res.value && res.value.length === 1 && res.value[0] === div && spy === div;
+    return getTest5Result([res, div, spy]);
   }
 
   return true;
@@ -97,15 +93,13 @@ const test6 = function test6() {
 
   if (isStrict) {
     let spy = null;
-    const res = attempt.call(
-      [1],
-      nativeFilter,
-      function testThis() {
-        /* eslint-disable-next-line babel/no-invalid-this */
-        spy = typeof this === 'string';
-      },
-      'x',
-    );
+
+    const testThis = function testThis() {
+      /* eslint-disable-next-line babel/no-invalid-this */
+      spy = typeof this === 'string';
+    };
+
+    const res = attempt.call([1], nativeFilter, testThis, 'x');
 
     return res.threw === false && res.value && res.value.length === 0 && spy === true;
   }
@@ -128,43 +122,39 @@ const test7 = function test7() {
 
 const isWorking = true.constructor(nativeFilter) && test1() && test2() && test3() && test4() && test5() && test6() && test7();
 
-const patchedFilter = function patchedFilter() {
-  return function filter(array, callBack /* , thisArg */) {
-    requireObjectCoercible(array);
-    const args = [assertIsFunction(callBack)];
+const patchedFilter = function filter(array, callBack /* , thisArg */) {
+  requireObjectCoercible(array);
+  const args = [assertIsFunction(callBack)];
 
-    if (arguments.length > 2) {
-      /* eslint-disable-next-line prefer-rest-params,prefer-destructuring */
-      args[1] = arguments[2];
-    }
+  if (arguments.length > 2) {
+    /* eslint-disable-next-line prefer-rest-params,prefer-destructuring */
+    args[1] = arguments[2];
+  }
 
-    return nativeFilter.apply(array, args);
-  };
+  return nativeFilter.apply(array, args);
 };
 
-export const implementation = function implementation() {
-  return function filter(array, callBack /* , thisArg */) {
-    const object = toObject(array);
-    // If no callback function or if callback is not a callable function
-    assertIsFunction(callBack);
-    const iterable = splitIfBoxedBug(object);
-    const length = toLength(iterable.length);
-    /* eslint-disable-next-line prefer-rest-params,no-void */
-    const thisArg = arguments.length > 2 ? arguments[2] : void 0;
-    const noThis = typeof thisArg === 'undefined';
-    const result = [];
-    for (let i = 0; i < length; i += 1) {
-      if (i in iterable) {
-        const item = iterable[i];
+export const implementation = function filter(array, callBack /* , thisArg */) {
+  const object = toObject(array);
+  // If no callback function or if callback is not a callable function
+  assertIsFunction(callBack);
+  const iterable = splitIfBoxedBug(object);
+  const length = toLength(iterable.length);
+  /* eslint-disable-next-line prefer-rest-params,no-void */
+  const thisArg = arguments.length > 2 ? arguments[2] : void 0;
+  const noThis = typeof thisArg === 'undefined';
+  const result = [];
+  for (let i = 0; i < length; i += 1) {
+    if (i in iterable) {
+      const item = iterable[i];
 
-        if (noThis ? callBack(item, i, object) : callBack.call(thisArg, item, i, object)) {
-          result[result.length] = item;
-        }
+      if (noThis ? callBack(item, i, object) : callBack.call(thisArg, item, i, object)) {
+        result[result.length] = item;
       }
     }
+  }
 
-    return result;
-  };
+  return result;
 };
 
 /**
@@ -178,6 +168,6 @@ export const implementation = function implementation() {
  * @throws {TypeError} If callBack is not a function.
  * @returns {Array} A new array with the elements that pass the test.
  */
-const $filter = isWorking ? patchedFilter() : implementation();
+const $filter = isWorking ? patchedFilter : implementation;
 
 export default $filter;
