@@ -7,11 +7,11 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 import attempt from 'attempt-x';
-import splitIfBoxedBug from 'split-if-boxed-bug-x';
-import toLength from 'to-length-x';
 import toObject from 'to-object-x';
 import assertIsFunction from 'assert-is-function-x';
 import requireObjectCoercible from 'require-object-coercible-x';
+import all from 'array-all-x';
+import toBoolean from 'to-boolean-x';
 var nf = [].filter;
 var nativeFilter = typeof nf === 'function' && nf;
 
@@ -26,7 +26,7 @@ var test1 = function test1() {
 
 var test2 = function test2() {
   var spy = '';
-  var res = attempt.call({}.constructor('abc'), nativeFilter, function spyAdd2(item, index) {
+  var res = attempt.call(toObject('abc'), nativeFilter, function spyAdd2(item, index) {
     spy += item;
     return index === 1;
   });
@@ -90,7 +90,7 @@ var test5 = function test5() {
 var test6 = function test6() {
   var isStrict = function returnIsStrict() {
     /* eslint-disable-next-line babel/no-invalid-this */
-    return true.constructor(this) === false;
+    return toBoolean(this) === false;
   }();
 
   if (isStrict) {
@@ -113,11 +113,11 @@ var test7 = function test7() {
   var fn = 'return nativeFilter.call("foo", function (_, __, context) {' + 'if (castBoolean(context) === false || typeof context !== "object") {' + 'spy.value = true;}});';
   /* eslint-disable-next-line no-new-func */
 
-  var res = attempt(Function('nativeFilter', 'spy', 'castBoolean', fn), nativeFilter, spy, true.constructor);
+  var res = attempt(Function('nativeFilter', 'spy', 'castBoolean', fn), nativeFilter, spy, toBoolean);
   return res.threw === false && res.value && res.value.length === 0 && spy.value !== true;
 };
 
-var isWorking = true.constructor(nativeFilter) && test1() && test2() && test3() && test4() && test5() && test6() && test7();
+var isWorking = toBoolean(nativeFilter) && test1() && test2() && test3() && test4() && test5() && test6() && test7();
 
 var patchedFilter = function filter(array, callBack
 /* , thisArg */
@@ -139,24 +139,27 @@ export var implementation = function filter(array, callBack
   var object = toObject(array); // If no callback function or if callback is not a callable function
 
   assertIsFunction(callBack);
-  var iterable = splitIfBoxedBug(object);
-  var length = toLength(iterable.length);
-  /* eslint-disable-next-line prefer-rest-params,no-void */
-
-  var thisArg = arguments.length > 2 ? arguments[2] : void 0;
-  var noThis = typeof thisArg === 'undefined';
   var result = [];
 
-  for (var i = 0; i < length; i += 1) {
-    if (i in iterable) {
-      var item = iterable[i];
+  var predicate = function predicate() {
+    /* eslint-disable-next-line prefer-rest-params */
+    var i = arguments[1];
+    /* eslint-disable-next-line prefer-rest-params */
 
-      if (noThis ? callBack(item, i, object) : callBack.call(thisArg, item, i, object)) {
+    if (i in arguments[2]) {
+      /* eslint-disable-next-line prefer-rest-params */
+      var item = arguments[0];
+      /* eslint-disable-next-line babel/no-invalid-this */
+
+      if (callBack.call(this, item, i, object)) {
         result[result.length] = item;
       }
     }
-  }
+  };
+  /* eslint-disable-next-line prefer-rest-params */
 
+
+  all(object, predicate, arguments[2]);
   return result;
 };
 /**

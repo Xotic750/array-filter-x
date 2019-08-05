@@ -1,7 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`filter should throw when array is null or undefined 1`] = `"Cannot call method on undefined"`;
+exports[`filter 0 should throw when array is null or undefined 1`] = `"Cannot call method on undefined"`;
 
-exports[`filter should throw when array is null or undefined 2`] = `"Cannot call method on undefined"`;
+exports[`filter 0 should throw when array is null or undefined 2`] = `"Cannot call method on undefined"`;
 
-exports[`filter should throw when array is null or undefined 3`] = `"Cannot call method on null"`;
+exports[`filter 0 should throw when array is null or undefined 3`] = `"Cannot call method on null"`;
+
+exports[`filter 1 should throw when array is null or undefined 1`] = `"Cannot call method on undefined"`;
+
+exports[`filter 1 should throw when array is null or undefined 2`] = `"Cannot call method on undefined"`;
+
+exports[`filter 1 should throw when array is null or undefined 3`] = `"Cannot call method on null"`;
