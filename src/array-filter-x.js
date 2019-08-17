@@ -4,16 +4,20 @@ import assertIsFunction from 'assert-is-function-x';
 import requireObjectCoercible from 'require-object-coercible-x';
 import all from 'array-all-x';
 import toBoolean from 'to-boolean-x';
+import methodize from 'simple-methodize-x';
+import call from 'simple-call-x';
 
 const nf = [].filter;
-const nativeFilter = typeof nf === 'function' && nf;
+const nativeFilter = typeof nf === 'function' && methodize(nf);
 
 const test1 = function test1() {
   let spy = 0;
-  const res = attempt.call([1, 2], nativeFilter, function spyAdd1(item) {
-    spy += item;
+  const res = attempt(function attemptee() {
+    return nativeFilter([1, 2], function spyAdd1(item) {
+      spy += item;
 
-    return false;
+      return false;
+    });
   });
 
   return res.threw === false && res.value && res.value.length === 0 && spy === 3;
@@ -21,10 +25,12 @@ const test1 = function test1() {
 
 const test2 = function test2() {
   let spy = '';
-  const res = attempt.call(toObject('abc'), nativeFilter, function spyAdd2(item, index) {
-    spy += item;
+  const res = attempt(function attemptee() {
+    return nativeFilter(toObject('abc'), function spyAdd2(item, index) {
+      spy += item;
 
-    return index === 1;
+      return index === 1;
+    });
   });
 
   return res.threw === false && res.value && res.value.length === 1 && res.value[0] === 'b' && spy === 'abc';
@@ -32,28 +38,30 @@ const test2 = function test2() {
 
 const test3 = function test3() {
   let spy = 0;
-  const res = attempt.call(
-    (function getArgs() {
+  const res = attempt(function attemptee() {
+    const args = (function getArgs() {
       /* eslint-disable-next-line prefer-rest-params */
       return arguments;
-    })(1, 2, 3),
-    nativeFilter,
-    function spyAdd3(item, index) {
+    })(1, 2, 3);
+
+    return nativeFilter(args, function spyAdd3(item, index) {
       spy += item;
 
       return index === 2;
-    },
-  );
+    });
+  });
 
   return res.threw === false && res.value && res.value.length === 1 && res.value[0] === 3 && spy === 6;
 };
 
 const test4 = function test4() {
   let spy = 0;
-  const res = attempt.call({0: 1, 1: 2, 3: 3, 4: 4, length: 4}, nativeFilter, function spyAdd4(item) {
-    spy += item;
+  const res = attempt(function attemptee() {
+    return nativeFilter({0: 1, 1: 2, 3: 3, 4: 4, length: 4}, function spyAdd4(item) {
+      spy += item;
 
-    return false;
+      return false;
+    });
   });
 
   return res.threw === false && res.value && res.value.length === 0 && spy === 6;
@@ -65,18 +73,20 @@ const getTest5Result = function getTest5Result(args) {
   return res.threw === false && res.value && res.value.length === 1 && res.value[0] === div && spy === div;
 };
 
-const test5 = function test5() {
-  const doc = typeof document !== 'undefined' && document;
+const doc = typeof document !== 'undefined' && document;
 
+const test5 = function test5() {
   if (doc) {
     let spy = null;
     const fragment = doc.createDocumentFragment();
     const div = doc.createElement('div');
     fragment.appendChild(div);
-    const res = attempt.call(fragment.childNodes, nativeFilter, function spyAssign(item) {
-      spy = item;
+    const res = attempt(function attemptee() {
+      return nativeFilter(fragment.childNodes, function spyAssign(item) {
+        spy = item;
 
-      return item;
+        return item;
+      });
     });
 
     return getTest5Result([res, div, spy]);
@@ -85,12 +95,12 @@ const test5 = function test5() {
   return true;
 };
 
-const test6 = function test6() {
-  const isStrict = (function returnIsStrict() {
-    /* eslint-disable-next-line babel/no-invalid-this */
-    return toBoolean(this) === false;
-  })();
+const isStrict = (function returnIsStrict() {
+  /* eslint-disable-next-line babel/no-invalid-this */
+  return toBoolean(this) === false;
+})();
 
+const test6 = function test6() {
   if (isStrict) {
     let spy = null;
 
@@ -99,7 +109,9 @@ const test6 = function test6() {
       spy = typeof this === 'string';
     };
 
-    const res = attempt.call([1], nativeFilter, testThis, 'x');
+    const res = attempt(function attemptee() {
+      return nativeFilter([1], testThis, 'x');
+    });
 
     return res.threw === false && res.value && res.value.length === 0 && spy === true;
   }
@@ -110,12 +122,14 @@ const test6 = function test6() {
 const test7 = function test7() {
   const spy = {};
   const fn =
-    'return nativeFilter.call("foo", function (_, __, context) {' +
+    'return nativeFilter("foo", function (_, __, context) {' +
     'if (castBoolean(context) === false || typeof context !== "object") {' +
     'spy.value = true;}});';
 
-  /* eslint-disable-next-line no-new-func */
-  const res = attempt(Function('nativeFilter', 'spy', 'castBoolean', fn), nativeFilter, spy, toBoolean);
+  const res = attempt(function attemptee() {
+    /* eslint-disable-next-line no-new-func */
+    return Function('nativeFilter', 'spy', 'castBoolean', fn)(nativeFilter, spy, toBoolean);
+  });
 
   return res.threw === false && res.value && res.value.length === 0 && spy.value !== true;
 };
@@ -123,15 +137,8 @@ const test7 = function test7() {
 const isWorking = toBoolean(nativeFilter) && test1() && test2() && test3() && test4() && test5() && test6() && test7();
 
 const patchedFilter = function filter(array, callBack /* , thisArg */) {
-  requireObjectCoercible(array);
-  const args = [assertIsFunction(callBack)];
-
-  if (arguments.length > 2) {
-    /* eslint-disable-next-line prefer-rest-params,prefer-destructuring */
-    args[1] = arguments[2];
-  }
-
-  return nativeFilter.apply(array, args);
+  /* eslint-disable-next-line prefer-rest-params, */
+  return nativeFilter(requireObjectCoercible(array), assertIsFunction(callBack), arguments[2]);
 };
 
 export const implementation = function filter(array, callBack /* , thisArg */) {
@@ -151,7 +158,7 @@ export const implementation = function filter(array, callBack /* , thisArg */) {
       const item = arguments[0];
 
       /* eslint-disable-next-line babel/no-invalid-this */
-      if (callBack.call(this, item, i, object)) {
+      if (call(callBack, this, [item, i, object])) {
         result[result.length] = item;
       }
     }

@@ -12,50 +12,62 @@ import assertIsFunction from 'assert-is-function-x';
 import requireObjectCoercible from 'require-object-coercible-x';
 import all from 'array-all-x';
 import toBoolean from 'to-boolean-x';
+import methodize from 'simple-methodize-x';
+import call from 'simple-call-x';
 var nf = [].filter;
-var nativeFilter = typeof nf === 'function' && nf;
+var nativeFilter = typeof nf === 'function' && methodize(nf);
 
 var test1 = function test1() {
   var spy = 0;
-  var res = attempt.call([1, 2], nativeFilter, function spyAdd1(item) {
-    spy += item;
-    return false;
+  var res = attempt(function attemptee() {
+    return nativeFilter([1, 2], function spyAdd1(item) {
+      spy += item;
+      return false;
+    });
   });
   return res.threw === false && res.value && res.value.length === 0 && spy === 3;
 };
 
 var test2 = function test2() {
   var spy = '';
-  var res = attempt.call(toObject('abc'), nativeFilter, function spyAdd2(item, index) {
-    spy += item;
-    return index === 1;
+  var res = attempt(function attemptee() {
+    return nativeFilter(toObject('abc'), function spyAdd2(item, index) {
+      spy += item;
+      return index === 1;
+    });
   });
   return res.threw === false && res.value && res.value.length === 1 && res.value[0] === 'b' && spy === 'abc';
 };
 
 var test3 = function test3() {
   var spy = 0;
-  var res = attempt.call(function getArgs() {
-    /* eslint-disable-next-line prefer-rest-params */
-    return arguments;
-  }(1, 2, 3), nativeFilter, function spyAdd3(item, index) {
-    spy += item;
-    return index === 2;
+  var res = attempt(function attemptee() {
+    var args = function getArgs() {
+      /* eslint-disable-next-line prefer-rest-params */
+      return arguments;
+    }(1, 2, 3);
+
+    return nativeFilter(args, function spyAdd3(item, index) {
+      spy += item;
+      return index === 2;
+    });
   });
   return res.threw === false && res.value && res.value.length === 1 && res.value[0] === 3 && spy === 6;
 };
 
 var test4 = function test4() {
   var spy = 0;
-  var res = attempt.call({
-    0: 1,
-    1: 2,
-    3: 3,
-    4: 4,
-    length: 4
-  }, nativeFilter, function spyAdd4(item) {
-    spy += item;
-    return false;
+  var res = attempt(function attemptee() {
+    return nativeFilter({
+      0: 1,
+      1: 2,
+      3: 3,
+      4: 4,
+      length: 4
+    }, function spyAdd4(item) {
+      spy += item;
+      return false;
+    });
   });
   return res.threw === false && res.value && res.value.length === 0 && spy === 6;
 };
@@ -69,17 +81,19 @@ var getTest5Result = function getTest5Result(args) {
   return res.threw === false && res.value && res.value.length === 1 && res.value[0] === div && spy === div;
 };
 
-var test5 = function test5() {
-  var doc = typeof document !== 'undefined' && document;
+var doc = typeof document !== 'undefined' && document;
 
+var test5 = function test5() {
   if (doc) {
     var spy = null;
     var fragment = doc.createDocumentFragment();
     var div = doc.createElement('div');
     fragment.appendChild(div);
-    var res = attempt.call(fragment.childNodes, nativeFilter, function spyAssign(item) {
-      spy = item;
-      return item;
+    var res = attempt(function attemptee() {
+      return nativeFilter(fragment.childNodes, function spyAssign(item) {
+        spy = item;
+        return item;
+      });
     });
     return getTest5Result([res, div, spy]);
   }
@@ -87,12 +101,12 @@ var test5 = function test5() {
   return true;
 };
 
-var test6 = function test6() {
-  var isStrict = function returnIsStrict() {
-    /* eslint-disable-next-line babel/no-invalid-this */
-    return toBoolean(this) === false;
-  }();
+var isStrict = function returnIsStrict() {
+  /* eslint-disable-next-line babel/no-invalid-this */
+  return toBoolean(this) === false;
+}();
 
+var test6 = function test6() {
   if (isStrict) {
     var spy = null;
 
@@ -101,7 +115,9 @@ var test6 = function test6() {
       spy = typeof this === 'string';
     };
 
-    var res = attempt.call([1], nativeFilter, testThis, 'x');
+    var res = attempt(function attemptee() {
+      return nativeFilter([1], testThis, 'x');
+    });
     return res.threw === false && res.value && res.value.length === 0 && spy === true;
   }
 
@@ -110,10 +126,11 @@ var test6 = function test6() {
 
 var test7 = function test7() {
   var spy = {};
-  var fn = 'return nativeFilter.call("foo", function (_, __, context) {' + 'if (castBoolean(context) === false || typeof context !== "object") {' + 'spy.value = true;}});';
-  /* eslint-disable-next-line no-new-func */
-
-  var res = attempt(Function('nativeFilter', 'spy', 'castBoolean', fn), nativeFilter, spy, toBoolean);
+  var fn = 'return nativeFilter("foo", function (_, __, context) {' + 'if (castBoolean(context) === false || typeof context !== "object") {' + 'spy.value = true;}});';
+  var res = attempt(function attemptee() {
+    /* eslint-disable-next-line no-new-func */
+    return Function('nativeFilter', 'spy', 'castBoolean', fn)(nativeFilter, spy, toBoolean);
+  });
   return res.threw === false && res.value && res.value.length === 0 && spy.value !== true;
 };
 
@@ -122,15 +139,8 @@ var isWorking = toBoolean(nativeFilter) && test1() && test2() && test3() && test
 var patchedFilter = function filter(array, callBack
 /* , thisArg */
 ) {
-  requireObjectCoercible(array);
-  var args = [assertIsFunction(callBack)];
-
-  if (arguments.length > 2) {
-    /* eslint-disable-next-line prefer-rest-params,prefer-destructuring */
-    args[1] = arguments[2];
-  }
-
-  return nativeFilter.apply(array, args);
+  /* eslint-disable-next-line prefer-rest-params, */
+  return nativeFilter(requireObjectCoercible(array), assertIsFunction(callBack), arguments[2]);
 };
 
 export var implementation = function filter(array, callBack
@@ -151,7 +161,7 @@ export var implementation = function filter(array, callBack
       var item = arguments[0];
       /* eslint-disable-next-line babel/no-invalid-this */
 
-      if (callBack.call(this, item, i, object)) {
+      if (call(callBack, this, [item, i, object])) {
         result[result.length] = item;
       }
     }
