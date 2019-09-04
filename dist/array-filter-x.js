@@ -2,7 +2,7 @@
 {
   "author": "Graham Fairweather",
   "copywrite": "Copyright (c) 2017",
-  "date": "2019-08-30T22:07:31.551Z",
+  "date": "2019-09-04T23:26:45.137Z",
   "describe": "",
   "description": "Creates an array with all elements that pass the test by the provided function.",
   "file": "array-filter-x.js",
